@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { shortenAddress } from '../../lib/utils';
 import { ethers } from 'ethers';
 
-export const AddressSelect = ({ onSignerObtained }) => {
+export default function AddressSelect({ onSignerObtained }) {
   const [address, setAddress] = useState(undefined);
   const getSigner = async () => {
     const provider = new ethers.providers.Web3Provider(window.ethereum, 'any');
@@ -24,7 +24,7 @@ export const AddressSelect = ({ onSignerObtained }) => {
     provider.listAccounts().then((accounts) => {
       if (accounts.length) getSigner();
     });
-  });
+  }, []);
 
   return (
     <button
@@ -44,4 +44,4 @@ export const AddressSelect = ({ onSignerObtained }) => {
       )}
     </button>
   );
-};
+}

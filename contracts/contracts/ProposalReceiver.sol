@@ -8,13 +8,15 @@ interface ProposalReceiver {
 }
 
 contract NewsDAO is ProposalReceiver {
+    mapping(uint256 => bool) public approvals;
+
     function handleProposalApproved(uint256 _proposalId)
         external
-        view
         override
     {
         console.log(
             string(abi.encodePacked("Proposal ", _proposalId, " approved!"))
         );
+        approvals[_proposalId] = true;
     }
 }
