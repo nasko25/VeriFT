@@ -19,7 +19,7 @@ export const Navbar = () => {
             </span>
           </a>
         </Link>
-        <NavItem href="/follow" name="Follow" />
+        <NavItem href="/user-frontend" name="Get tickets" />
       </nav>
     </>
   );

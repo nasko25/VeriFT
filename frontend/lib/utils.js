@@ -17,3 +17,21 @@ export const isValidAddress = (address) => {
     return false;
   }
 };
+
+export const safeParseInt = (value) => {
+  try {
+    return parseInt(value);
+  } catch (e) {
+    return 0;
+  }
+};
+
+export const hashImage = async (image) => {
+  return await (async () => {
+    const arrayBuffer = await (
+      await fetch(URL.createObjectURL(image))
+    ).arrayBuffer();
+    const hash = ethers.utils.sha256(new Uint8Array(image));
+    return hash;
+  })();
+};

@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from 'react';
 import AddressSelect from './AddressSelect';
 import { ethers } from 'ethers';
 
-const local = true;
+const local = false;
 
 const SignerContext = React.createContext(undefined);
 
