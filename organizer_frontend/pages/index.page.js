@@ -9,8 +9,10 @@ import { useSigner } from './contexts/SignerContext';
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json";
+import eventToAddressStoreJson from "../../contracts/artifacts/contracts/EventToAddressStore.sol/EventToAddressStore.json";
 
 const chain = "rinkeby";
+const eventToAddressStoreContractAddress = "0x49Ba26AbAd75451958F92CD39aC96776Fa0dbFEa";
 
 export default function Home() {
   // const signer = useSigner();
@@ -61,6 +63,7 @@ export default function Home() {
  }, [])
 
 
+  const [eventName, setEventName] = useState('');
   const [address, setAddress] = useState('');
   const [collecionName, setCollecionName] = useState('');
   const [maxTickets, setMaxTickets] = useState('');
@@ -72,10 +75,10 @@ export default function Home() {
   const [contract, setContract] = useState({ address: "" });
   const deployContract = async () => {
     if (isNaN(maxTickets))
-      alert("Number of nfts to mint is not an integer. Try again.");
+      alert("Number of tickets is not an integer. Try again.");
     else {
         // Uint8Array.from(Buffer.from(hexString, 'hex'))
-      const factory = new ContractFactory(eventJson.abi, Buffer.from(eventJson.deployedBytecode, 'hex'), signer);
+      const factory = new ContractFactory(eventJson.abi, eventJson.bytecode, signer);
       const contractConstructor = { _NFTToHold: address,
                                     _maxTicketNumber: maxTickets,
                                     _price: ticketPrice,
@@ -83,20 +86,28 @@ export default function Home() {
                                     _eventSymbol: "eth",
                                     _tokenURI: ticketImage
                                   };
-      setContract(await factory.deploy(contractConstructor._NFTToHold,
+      const deployedContract = await factory.deploy(contractConstructor._NFTToHold,
                                             contractConstructor._maxTicketNumber,
                                             ethers.utils.parseEther(contractConstructor._price),
                                             contractConstructor._eventName,
                                             contractConstructor._eventSymbol,
                                             contractConstructor._tokenURI
-                                           )
-      );
+                               );
+      // wait until the contract is deployed
+      await deployedContract.deployed();
+      setContract(deployedContract);
 
+      // TODO combine the two contract functions in one
+      const eventToAddressStoreContract = new ethers.Contract(eventToAddressStoreContractAddress, eventToAddressStoreJson.abi, signer);
+      // await new Promise(res => setTimeout(res, 2000));
+      await eventToAddressStoreContract.setAddressForEvent(eventName, ethers.utils.getAddress(deployedContract.address));
+      await eventToAddressStoreContract.setUriForAddress(ticketImage, ethers.utils.getAddress(deployedContract.address));
     }
   }
   // TODO contract addr or choose from list
   return (
     <div>
+      <Input value={eventName} onInput={e => setEventName(e.target.value)}> Name of the event: </Input>
       <Input className="address" value={address} onInput={e => setAddress(e.target.value)}> Contract address: </Input>
       <Input className="name-of-collection" value={collecionName} onInput={e => setCollecionName(e.target.value)}> Collection Name: </Input>
       <Input className="num-to-mint" value={maxTickets} onInput={e => setMaxTickets(e.target.value)}> Max # of tickets: </Input>
@@ -109,6 +120,7 @@ export default function Home() {
                 console.log("Contract deployed at: ", contract.address);
                 setBtnDisabled(false);
             }).catch(e => {
+                console.error(e);
                 setContract({ address: "" });
                 setDisplayAddress(true);
                 setBtnDisabled(false);
