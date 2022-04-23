@@ -16,7 +16,7 @@ export default function TicketInfo({ image, data }) {
     console.log(qrCodeURL);
     let aEl = document.createElement('a');
     aEl.href = qrCodeURL;
-    aEl.download = 'QR_Code.png';
+    aEl.download = 'Ticket.png';
     document.body.appendChild(aEl);
     aEl.click();
     document.body.removeChild(aEl);

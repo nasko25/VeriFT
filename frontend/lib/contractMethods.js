@@ -37,8 +37,24 @@ export const getOwner = async (nftAddress, tokenId, signer) => {
   return await contract.ownerOf(tokenId);
 };
 
-export const mintTicket = async (eventAddress, nftId, hash, signer) => {
+export const mintTicket = async (eventAddress, nftId, hash, price, signer) => {
   const contract = new ethers.Contract(eventAddress, eventJson.abi, signer);
-  const tx = await contract.mintTicket(nftId, hash);
+  const tx = await contract.mintTicket(nftId, hash, { value: price });
   await tx.wait();
+};
+
+import mapping from '../public/EventToAddressStore.json';
+
+export const getAddressByName = async (name, signer) => {
+  const contract = new ethers.Contract(
+    '0xd43aB058d44ae56BEffA005991FFA3E9a6C41B8A',
+    mapping.abi,
+    signer
+  );
+  return await contract.eventNameToAddress(name);
+};
+
+export const getEventPrice = async (eventAddress, signer) => {
+  const contract = new ethers.Contract(eventAddress, eventJson.abi, signer);
+  return await contract.price();
 };

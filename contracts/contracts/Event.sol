@@ -59,10 +59,16 @@ contract Event {
         owner = msg.sender;
     }
 
+    function withdraw(address _receiver) external {
+        require(msg.sender == owner);
+        payable(_receiver).transfer(address(this).balance);
+    }
+
     function mintTicket(uint256 _index, string memory _hash)
         external
-        returns (uint256)
+        payable
     {
+        require(msg.value == price);
         require(
             ERC721(NFTToHold).ownerOf(_index) == msg.sender,
             "You do not own this NFT"
@@ -71,11 +77,9 @@ contract Event {
             mintedFromIndex[_index] < maxTicketNumber,
             "All possible tickets have been minted from this NFT"
         );
-        payable(owner).transfer(price);
         mintedFromIndex[_index] += 1;
         hashesForNFT[_index].push(_hash);
         hashes[_hash] = true;
-        return TicketNFT(ticketNFTContract).mintNFT(msg.sender);
-        return 0;
+        TicketNFT(ticketNFTContract).mintNFT(msg.sender);
     }
 }
