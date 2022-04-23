@@ -12,7 +12,7 @@ import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json"
 import eventToAddressStoreJson from "../../contracts/artifacts/contracts/EventToAddressStore.sol/EventToAddressStore.json";
 
 const chain = "rinkeby";
-const eventToAddressStoreContractAddress = "0x49Ba26AbAd75451958F92CD39aC96776Fa0dbFEa";
+const eventToAddressStoreContractAddress = "0xd43aB058d44ae56BEffA005991FFA3E9a6C41B8A";
 
 export default function Home() {
   // const signer = useSigner();
@@ -97,11 +97,9 @@ export default function Home() {
       await deployedContract.deployed();
       setContract(deployedContract);
 
-      // TODO combine the two contract functions in one
       const eventToAddressStoreContract = new ethers.Contract(eventToAddressStoreContractAddress, eventToAddressStoreJson.abi, signer);
       // await new Promise(res => setTimeout(res, 2000));
-      await eventToAddressStoreContract.setAddressForEvent(eventName, ethers.utils.getAddress(deployedContract.address));
-      await eventToAddressStoreContract.setUriForAddress(ticketImage, ethers.utils.getAddress(deployedContract.address));
+      await eventToAddressStoreContract.setAddressAndUriForEvent(ethers.utils.getAddress(deployedContract.address), ticketImage, eventName);
     }
   }
   // TODO contract addr or choose from list

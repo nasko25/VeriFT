@@ -26,4 +26,14 @@ contract EventToAddressStore {
 
         return 0;
     }
+
+    function setAddressAndUriForEvent (address _addr, string memory _uri, string memory _eventName) external
+        returns ( uint256 ) {
+
+            require(Event(_addr).owner() == msg.sender, "You do not own this contract.");
+            eventNameToAddress[_eventName] = _addr;
+            addressToUri[_addr] = _uri;
+
+            return 0;
+        }
 }
