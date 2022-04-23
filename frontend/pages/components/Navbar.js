@@ -15,11 +15,11 @@ export const Navbar = () => {
         <Link href="/">
           <a className="inline-flex items-center p-2 mr-4 ">
             <span className="text-xl text-white font-bold uppercase tracking-wide">
-              Template
+              VeriFT Home
             </span>
           </a>
         </Link>
-        <NavItem href="/user-frontend" name="Get tickets" />
+        <NavItem href="/mint-nft" name="Get test nft" />
       </nav>
     </>
   );

@@ -98,21 +98,19 @@ export default function Mint() {
   if (minting === 'done') {
     return <TicketInfo image={image} data={{ ipfsPath, nftId, name }} />;
   }
-  if (minting === 'minting') {
-    return (
-      <div>Minting... This may take a few seconds. Do not navigate away...</div>
-    );
-  }
+  if (minting === 'minting')
+    return 'Minting... This may take a few seconds. Do not navigate away...';
 
   const minted = nfts.map(([id, count]) => count).reduce((a, b) => a + b, 0);
   const totalAllowance = allowance * nfts.length;
 
   return (
     <div>
-      You are allowed to mint {allowance} tickets per nft ({totalAllowance} in
-      total). You have already minted {minted} tickets.
+      You have minted {minted} / {totalAllowance} tickets.
       <div className="shadow-lg mx-5 border-2 border-slate-700 p-3 rounded-lg">
-        Mint ticket
+        <h2 className="text-xl text-blue-700 mb-2">Mint a ticket</h2>
+        Select a picture for this ticket. It will be used to verify your ticket
+        at entrance.
         <ImageInput onSelected={setImage} />
         <form onSubmit={handleSubmit}>
           <input

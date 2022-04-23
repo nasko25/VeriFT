@@ -17,6 +17,9 @@ export default function UserFrontend() {
   return (
     <div>
       <h1 className="text-2xl text-center">Find Your Event</h1>
+      <p className="text-gray-600 text-center">
+        Hint: try 0x1921a0CA21FC78FD988c767FCF93D7C54Acc6910
+      </p>
       <input
         className="border-2 border-gray-500 p-2 rounded-lg mx-auto block"
         type="text"
