@@ -11,16 +11,20 @@ import {
   getMintedFromToken,
   getOwner,
   mintTicket,
+  getEventPrice,
 } from '../../lib/contractMethods';
 import getTokensByOwner from '../../lib/tokensByOwner';
 
 const nftAddress = '0x47A7Cd83471D9d8d4A856bBb641F14f985d6bACb';
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function Mint() {
   const signer = useSigner();
 
   const eventAddress = useRouter().query.address;
   const [allowance, setAllowance] = useState(undefined);
+  const [eventPrice, setEventPrice] = useState(0);
 
   const [ipfsPath, setIpfsPath] = useState(undefined);
 
@@ -47,7 +51,8 @@ export default function Mint() {
     if (!canMint) return;
     console.log('Minting');
     setMinting('minting');
-    await mintTicket(eventAddress, nftId, imageHash, signer);
+    mintTicket(eventAddress, nftId, imageHash, eventPrice, signer);
+    await sleep(3000);
     setMinting('done');
   };
 
@@ -80,6 +85,10 @@ export default function Mint() {
       setAllowance(parseInt(bnAllowance))
     );
 
+    getEventPrice(eventAddress, signer).then((bnPrice) =>
+      setEventPrice(parseInt(bnPrice))
+    );
+
     const getNfts = async () => {
       const userAddress = await signer.getAddress();
       console.log({ nftAddress, userAddress });
@@ -107,6 +116,8 @@ export default function Mint() {
   return (
     <div>
       You have minted {minted} / {totalAllowance} tickets.
+      <br />
+      This event costs {eventPrice} wei.
       <div className="shadow-lg mx-5 border-2 border-slate-700 p-3 rounded-lg">
         <h2 className="text-xl text-blue-700 mb-2">Mint a ticket</h2>
         Select a picture for this ticket. It will be used to verify your ticket
