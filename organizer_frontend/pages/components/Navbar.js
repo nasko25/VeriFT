@@ -13,13 +13,13 @@ export const Navbar = () => {
     <>
       <nav className="flex items-center flex-wrap bg-blue-500 p-3">
         <Link href="/">
-          <a className="inline-flex items-center p-2 mr-4 ">
-            <span className="text-xl text-white font-bold uppercase tracking-wide">
-              Template
+          <a className="inline-flex items-center p-2 mr-4">
+            <span className="text-xl text-white font-bold tracking-wide">
+              VeriFT
             </span>
           </a>
         </Link>
-        <NavItem href="/follow" name="Follow" />
+        {/* <NavItem href="/follow" name="Follow" /> */}
       </nav>
     </>
   );

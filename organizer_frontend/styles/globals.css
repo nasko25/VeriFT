@@ -23,3 +23,33 @@ input {
 button {
     margin-top: 2em !important;
 }
+
+.box {
+    background-color: white;
+    padding: 4em 4em;
+    margin: 0;
+}
+
+.padded-r-1 {
+    margin: 0;
+    padding-right: 1em;
+}
+
+.done {
+    font-weight: bold;
+    font-size: 2em;
+}
+
+.error {
+    font-size: 2em;
+    color: #CC1010;
+}
+
+.btn-err {
+    color: #cc1010;
+    border-color: #cc1010;
+}
+
+.btn-err:hover {
+    background-color: #cc1010 !important;
+}

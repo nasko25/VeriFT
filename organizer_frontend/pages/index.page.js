@@ -1,12 +1,15 @@
 import {React, useState, useEffect} from 'react';
 import Button from './components/Button';
 import Input from './components/Input';
+import { Dialog } from './components/Dialog';
+import DeployedAddressBox from './components/DeployedAddressBox';
+import ErrorDeployingBox from './components/ErrorDeployingBox';
 import { ethers, ContractFactory } from 'ethers';
 import { useSigner } from './contexts/SignerContext';
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 
-const address = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+const addressTest = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 const abi = [
   {
     inputs: [
@@ -65,7 +68,7 @@ export default function Home() {
         // rpc: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}`
 
         // web3modal needs better documentation  -.-
-        rpc: { 1: "https://api-eu1.tatum.io/v3/blockchain/node/ETH/d7b6ca8d-69a1-4eb0-8f22-64a46f9caf98" }  // no clue why chain id needs to be 1...
+        rpc: { 1: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }  // no clue why chain id needs to be 1...
         // rpc: { 1: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"}
       }
     }
@@ -98,23 +101,26 @@ export default function Home() {
   const [maxTickets, setMaxTickets] = useState('');
   const [ticketPrice, setTicketPrice] = useState('');
   const [ticketImage, setTicketImage] = useState('');
+  const [displayAddress, setDisplayAddress] = useState(false);
 
+  // TODO set to ""
+  let contract = { address: addressTest };
   // TODO some input verification would be nice
   const deployContract = async () => {
     if (isNaN(maxTickets))
       alert("Number of nfts to mint is not an integer. Try again.");
     else {
-      alert(signer);
-      const factory = new ContractFactory(abi, contractByteCode, signer);
-      const contract = await factory.deploy({_NFTToHold: address,
-                                             _maxTicketNumber: maxTickets,
-                                             _price: ticketPrice,
-                                             _eventName: collecionName,
-                                             _eventSymbol: "eth",
-                                             imageURI: ticketImage});
-  
-      console.log(contract.address);
-      console.log(contract.deployTransaction);
+      // const factory = new ContractFactory(abi, contractByteCode, signer);
+      // const contract = await factory.deploy({_NFTToHold: address,
+      //                                        _maxTicketNumber: maxTickets,
+      //                                        _price: ticketPrice,
+      //                                        _eventName: collecionName,
+      //                                        _eventSymbol: "eth",
+      //                                        imageURI: ticketImage});
+
+      setDisplayAddress(true);
+      console.log("Contract deployed at: ", contract.address);
+      // console.log(contract.deployTransaction);
     }
   }
   // TODO contract addr or choose from list
@@ -128,6 +134,9 @@ export default function Home() {
       <Button className="m-3" onClick={deployContract}>
         Generate
       </Button>
+      <Dialog open={displayAddress} onClose={ () => setDisplayAddress(false) }>
+      { contract.address != "" ? <DeployedAddressBox> {contract.address} </DeployedAddressBox> : <ErrorDeployingBox onClick={() => setDisplayAddress(false)}/> }
+      </Dialog>
     </div>
   );
 }
