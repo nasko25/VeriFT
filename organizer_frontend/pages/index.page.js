@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import Button from './components/Button';
 import Input from './components/Input';
 import { Dialog } from './components/Dialog';
@@ -93,7 +93,7 @@ export default function Home() {
       // alert(await signer.getBalance());
     }
     runWeb3Modal()
- }, [])
+  }, [])
 
 
   const [address, setAddress] = useState('');
@@ -124,9 +124,25 @@ export default function Home() {
     }
   }
   // TODO contract addr or choose from list
+
+  const balance = await lensHub.balanceOf(user.address);
+  let profiles = [];
+  for (var i = 0; i < balance.toNumber(); ++i) {
+    let profile = await lensHub.tokenOfOwnerByIndex(user.address, i);
+    profiles.push(profile);
+  }
+
+  const [value, setValue] = React.useState('fruit');
+
   return (
     <div>
       <Input className="address" value={address} onInput={e => setAddress(e.target.value)}> Contract address: </Input>
+      or
+      <select value={0} onChange={onChange}>
+        {options.map((option) => (
+          <option value={option.value}>{option.label}</option>
+        ))}
+      </select>
       <Input className="name-of-collection" value={collecionName} onInput={e => setCollecionName(e.target.value)}> Collection Name: </Input>
       <Input className="num-to-mint" value={maxTickets} onInput={e => setMaxTickets(e.target.value)}> Max # of tickets: </Input>
       <Input value={ticketPrice} onInput={e => setTicketPrice(e.target.value)}> Ticket price: </Input>
@@ -134,8 +150,8 @@ export default function Home() {
       <Button className="m-3" onClick={deployContract}>
         Generate
       </Button>
-      <Dialog open={displayAddress} onClose={ () => setDisplayAddress(false) }>
-      { contract.address != "" ? <DeployedAddressBox> {contract.address} </DeployedAddressBox> : <ErrorDeployingBox onClick={() => setDisplayAddress(false)}/> }
+      <Dialog open={displayAddress} onClose={() => setDisplayAddress(false)}>
+        {contract.address != "" ? <DeployedAddressBox> {contract.address} </DeployedAddressBox> : <ErrorDeployingBox onClick={() => setDisplayAddress(false)} />}
       </Dialog>
     </div>
   );
