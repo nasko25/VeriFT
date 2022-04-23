@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.float-right {
+    float: right;
+}
+
+/* .address {
+    
+} */
+
+.input-desc {
+    display:inline-block;
+    width: 9em;
+}
+
+input {
+    width: 270px;
+    margin-bottom: 1em;
+}
+
+button {
+    margin-top: 2em !important;
+}
