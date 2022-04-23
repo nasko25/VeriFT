@@ -27,11 +27,12 @@ export const safeParseInt = (value) => {
 };
 
 export const hashImage = async (image) => {
-  return await (async () => {
-    const arrayBuffer = await (
-      await fetch(URL.createObjectURL(image))
-    ).arrayBuffer();
-    const hash = ethers.utils.sha256(new Uint8Array(image));
-    return hash;
-  })();
+  const arrayBuffer = await (
+    await fetch(URL.createObjectURL(image))
+  ).arrayBuffer();
+  const bytes = new Uint8Array(arrayBuffer);
+  const hash = ethers.utils.sha256(bytes);
+
+  console.log({ image, arrayBuffer, bytes });
+  return hash;
 };

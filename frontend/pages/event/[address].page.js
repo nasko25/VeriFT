@@ -1,92 +1,146 @@
 import React, { useEffect, useState } from 'react';
+import TicketInfo from '../components/TicketInfo';
 import Button from '../components/Button';
 import ImageInput from '../components/ImageInput';
-import TicketInfo from '../components/TicketInfo';
 import { useRouter } from 'next/router';
 import { hashImage } from '../../lib/utils';
-import { upload } from '../../lib/ipfs-utils';
-import { ethers } from 'ethers';
 import { useSigner } from '../contexts/SignerContext';
-import eventContract from '../../public/Event.json';
+import { upload } from '../../lib/ipfs-utils';
+import {
+  getAllowance,
+  getMintedFromToken,
+  getOwner,
+  mintTicket,
+} from '../../lib/contractMethods';
+import getTokensByOwner from '../../lib/tokensByOwner';
+
+const nftAddress = '0x47A7Cd83471D9d8d4A856bBb641F14f985d6bACb';
 
 export default function Mint() {
-  const address = useRouter().query.address;
-  const [allowance, setAllowance] = useState(undefined);
-  const [imageHash, setImageHash] = useState('');
-  const [ipfsPath, setIpfsPath] = useState(undefined);
-  const [nfts, setNfts] = useState({ 1: 0, 12: 0, 123: 0, 1234: 0 });
-  const [nftId, setNftId] = useState(1);
-  const [image, setImage] = useState(null);
-  const [name, setName] = useState('');
-  const [minted, setMinted] = useState(false);
-
   const signer = useSigner();
 
-  const getAllowance = async () => {
-    if (!address) return;
-    const contract = new ethers.Contract(address, eventContract.abi, signer);
-    const allowance = await contract.maxTicketNumber();
-    setAllowance(allowance);
+  const eventAddress = useRouter().query.address;
+  const [allowance, setAllowance] = useState(undefined);
+
+  const [ipfsPath, setIpfsPath] = useState(undefined);
+
+  const [nfts, setNfts] = useState([]);
+  const [name, setName] = useState('');
+  const [image, setImage] = useState(null);
+  const [nftId, setNftId] = useState('');
+  const [minting, setMinting] = useState('no');
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!image) {
+      alert('Please select an image');
+      return;
+    }
+    const imageHash = await hashImage(image);
+    console.log({ imageHash });
+    const ipfsUri = await upload(image);
+    const ipfsPath = 'https://ipfs.io/ipfs/' + ipfsUri;
+    setIpfsPath(ipfsPath);
+    console.log('data uploaded at ' + ipfsPath);
+    const canMint = await verifyCanMint(nftId);
+
+    if (!canMint) return;
+    console.log('Minting');
+    setMinting('minting');
+    await mintTicket(eventAddress, nftId, imageHash, signer);
+    setMinting('done');
+  };
+
+  const verifyCanMint = async (tokenId) => {
+    try {
+      const owner = await getOwner(nftAddress, tokenId, signer);
+      if (owner !== (await signer.getAddress())) {
+        alert('You are not the owner of this token');
+        return false;
+      }
+    } catch (e) {
+      alert('Token ID is not owned by you');
+      return false;
+    }
+    const allowance = parseInt(await getAllowance(eventAddress, signer));
+    const minted = parseInt(
+      await getMintedFromToken(eventAddress, tokenId, signer)
+    );
+    console.log({ minted, allowance });
+    if (minted >= allowance) {
+      alert('You have already minted the maximum number of tickets');
+      return false;
+    }
+    return true;
   };
 
   useEffect(() => {
-    getAllowance();
-  }, [address]);
+    if (!signer) return;
+    getAllowance(eventAddress, signer).then((bnAllowance) =>
+      setAllowance(parseInt(bnAllowance))
+    );
 
-  const handleImageSelected = (image) => {
-    setImage(image);
-    hashImage(image).then(setImageHash);
-  };
+    const getNfts = async () => {
+      const userAddress = await signer.getAddress();
+      console.log({ nftAddress, userAddress });
+      const nftIds = await getTokensByOwner(nftAddress, userAddress);
+      const mintCounts = await Promise.all(
+        nftIds.map(async (id) => {
+          const minted = await getMintedFromToken(eventAddress, id, signer);
+          return [id, parseInt(minted)];
+        })
+      );
+      setNfts(mintCounts);
+    };
+    getNfts();
+  }, [signer]);
 
-  const handleMint = (e) => {
-    e.preventDefault();
-    console.log({ name, nftId, imageHash });
-    upload(image).then((address) => {
-      const ipfsPath = 'https://ipfs.io/ipfs/' + address;
-      setIpfsPath(ipfsPath);
-      console.log('data uploaded at ' + ipfsPath);
-      setMinted(true);
-    });
-  };
-
-  const mintedCount = Object.values(nfts).reduce((acc, cur) => acc + cur, 0);
-
-  if (minted) {
+  if (minting === 'done') {
     return <TicketInfo image={image} data={{ ipfsPath, nftId, name }} />;
   }
+  if (minting === 'minting') {
+    return (
+      <div>Minting... This may take a few seconds. Do not navigate away...</div>
+    );
+  }
+
+  const minted = nfts.map(([id, count]) => count).reduce((a, b) => a + b, 0);
+  const totalAllowance = allowance * nfts.length;
 
   return (
     <div>
-      Mint
-      <br />
-      {allowance &&
-        'You have minted ' +
-          mintedCount +
-          ' out of ' +
-          allowance +
-          ' tickets you are allowed.'}
-      <br />
+      You are allowed to mint {allowance} tickets per nft ({totalAllowance} in
+      total). You have already minted {minted} tickets.
       <div className="shadow-lg mx-5 border-2 border-slate-700 p-3 rounded-lg">
-        Mint ticket {mintedCount + 1}
-        <ImageInput onSelected={handleImageSelected} />
-        <form onSubmit={handleMint}>
+        Mint ticket
+        <ImageInput onSelected={setImage} />
+        <form onSubmit={handleSubmit}>
           <input
             type="text"
             placeholder="Name"
-            className="border-2 border-gray-500 p-2 rounded-lg block"
+            className="border-2 border-gray-500 p-2 rounded-lg block my-2"
             value={name}
             onChange={(e) => setName(e.target.value)}
           />
           <select
-            className="border-2 border-gray-500 p-2 rounded-lg my-2 block"
-            onChange={(e) => setNftId(parseInt(e.target.value))}
+            placeholder="NFT ID"
+            className="border-2 border-gray-500 p-2 rounded-lg block my-2"
             value={nftId}
+            onChange={(e) => setNftId(e.target.value)}
           >
-            {Object.entries(nfts).map(([nftId, idMinted]) => (
-              <option key={nftId} value={nftId}>
-                {nftId} : {idMinted} / {allowance}
-              </option>
-            ))}
+            {nfts.map(([nftId, count]) => {
+              const color =
+                count === allowance
+                  ? 'bg-red-500'
+                  : count === 0
+                  ? 'bg-green-500'
+                  : 'bg-yellow-500';
+              return (
+                <option key={nftId} value={nftId} className={color}>
+                  NFT {nftId}: minted {count} / {allowance}
+                </option>
+              );
+            })}
           </select>
           <Button primary type="submit">
             Mint ticket

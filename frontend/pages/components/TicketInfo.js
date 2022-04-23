@@ -26,12 +26,14 @@ export default function TicketInfo({ image, data }) {
     <div>
       <div>
         <h1 className="text-2xl text-center">Your ticket</h1>
-        <Button primary className="mr-5" onClick={downloadQRCode}>
-          Download Ticket
-        </Button>
-        <Button onClick={() => window.location.reload(false)}>
-          Mint more tickets
-        </Button>
+        <div className="flex justify-center">
+          <Button primary className="mr-5" onClick={downloadQRCode}>
+            Download Ticket
+          </Button>
+          <Button onClick={() => window.location.reload(false)}>
+            Mint more tickets
+          </Button>
+        </div>
         <p>
           <strong>Name:</strong> {data.name}
         </p>
@@ -39,12 +41,14 @@ export default function TicketInfo({ image, data }) {
           <strong>NFT ID:</strong> {data.nftId}
         </p>
         <p>
-          <strong>IPFS Path:</strong> {data.ipfsPath}
+          <a href={data.ipfsPath} className="underline">
+            <strong>View on IPFS</strong>
+          </a>
         </p>
       </div>
-      <div className="flex gap-6">
+      <div className="flex gap-6 justify-around my-5">
         <QRCode id="qrCodeEl" size={150} value={JSON.stringify(data)} />
-        <img src={imageUrl} alt="preview" className="object-contain" />
+        <img src={imageUrl} alt="preview" className="object-contain h-48" />
       </div>
     </div>
   );
