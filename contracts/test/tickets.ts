@@ -86,8 +86,8 @@ describe("Tickets", function () {
         await exampleNFT.mint("ABC");
         event.mintTicket(0, 'abd');
         await expect(
-            await event.hashes(0)
-        ).to.equal("abd");
+            await event.hashes('abd')
+        ).to.equal(true);
     });
 
     it("Hash of picture is stored after minting second ticket", async function () {
@@ -110,7 +110,7 @@ describe("Tickets", function () {
         event.mintTicket(0, 'abd1');
 
         await expect(
-            await event.hashes(1)
-        ).to.equal("abd1");
+            await event.hashes('abd1')
+        ).to.equal(true);
     });
 });

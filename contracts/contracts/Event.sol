@@ -38,7 +38,7 @@ contract Event {
     uint256 public price;
     mapping(uint256 => uint256) public mintedFromIndex;
     mapping(uint256 => string[]) public hashesForNFT;
-    string[] public hashes;
+    mapping(string => bool) public hashes;
     address public ticketNFTContract;
     address public owner;
 
@@ -74,7 +74,7 @@ contract Event {
         payable(owner).transfer(price);
         mintedFromIndex[_index] += 1;
         hashesForNFT[_index].push(_hash);
-        hashes.push(_hash);
+        hashes[_hash] = true;
         return TicketNFT(ticketNFTContract).mintNFT(msg.sender);
         return 0;
     }
