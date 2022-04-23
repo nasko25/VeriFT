@@ -10,7 +10,7 @@ import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json";
 
-const chain = "ropsten";
+const chain = "rinkeby";
 
 export default function Home() {
   // const signer = useSigner();
@@ -70,7 +70,6 @@ export default function Home() {
   const [btnDisabled, setBtnDisabled] = useState(false);
 
   const [contract, setContract] = useState({ address: "" });
-  // TODO some input verification would be nice
   const deployContract = async () => {
     if (isNaN(maxTickets))
       alert("Number of nfts to mint is not an integer. Try again.");
