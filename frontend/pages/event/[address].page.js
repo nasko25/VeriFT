@@ -51,8 +51,7 @@ export default function Mint() {
     if (!canMint) return;
     console.log('Minting');
     setMinting('minting');
-    mintTicket(eventAddress, nftId, imageHash, eventPrice, signer);
-    await sleep(3000);
+    await mintTicket(eventAddress, nftId, imageHash, eventPrice, signer);
     setMinting('done');
   };
 

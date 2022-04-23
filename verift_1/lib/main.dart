@@ -36,6 +36,281 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  String abiJson = """[
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "addressToUri",
+      "outputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "",
+          "type": "string"
+        }
+      ],
+      "name": "eventNameToAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_addr",
+          "type": "address"
+        },
+        {
+          "internalType": "string",
+          "name": "_uri",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_eventName",
+          "type": "string"
+        }
+      ],
+      "name": "setAddressAndUriForEvent",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_eventName",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_addr",
+          "type": "address"
+        }
+      ],
+      "name": "setAddressForEvent",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_uri",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_addr",
+          "type": "address"
+        }
+      ],
+      "name": "setUriForAddress",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]""";
+  late final Web3Client ethClient;
+  late final Future<List<dynamic>>? futureOfIpfs;
+  late final Future<List<dynamic>>? futureOfWeb3;
+  final Client httpClient = Client();
+  late TextEditingController _controller;
+  final _formKey = GlobalKey<FormState>();
+
+  late String eventName;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+
+    final String apiUrl = "https://rinkeby.infura.io/v3/3b40e219c16244cc8d727fff28f50af2";
+    final String s = "wss://rinkeby.infura.io/ws/v3/3b40e219c16244cc8d727fff28f50af2";
+    ethClient = Web3Client(apiUrl, httpClient, socketConnector: () => IOWebSocketChannel.connect(s).cast<String>());
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<List<dynamic>> getEventNameToAddress(Web3Client ethClient, String eventName) async {
+    final contract =
+        DeployedContract(ContractAbi.fromJson(abiJson, "EventToAddressStore"), EthereumAddress.fromHex("0xd43aB058d44ae56BEffA005991FFA3E9a6C41B8A"));
+    final ethFunction = contract.function("eventNameToAddress");
+    final result = await ethClient.call(contract: contract, function: ethFunction, params: [eventName]);
+    print(result);
+    return result;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GradientText(
+            'VeriFT',
+            style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w500, fontStyle: FontStyle.italic),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Colors.blue,
+                Colors.red,
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                GradientText(
+                  'Enter the name of your event:',
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w300),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Colors.blue,
+                      Colors.red,
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      controller: _controller,
+
+                      // The validator receives the text that the user has entered.
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          SizedBox(height: 50),
+          Center(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Stack(
+                children: <Widget>[
+                  Positioned.fill(
+                    child: Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Colors.blue,
+                            Colors.red,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ButtonStyle(
+                      fixedSize: MaterialStateProperty.all(Size(MediaQuery.of(context).size.width * 0.8, MediaQuery.of(context).size.width * 0.05)),
+                      backgroundColor: MaterialStateProperty.all(Colors.green.withOpacity(0)),
+                      shadowColor: MaterialStateProperty.all(Colors.green.withOpacity(0)),
+                    ),
+                    onPressed: () async {
+                      // Validate returns true if the form is valid, or false otherwise.
+                      if (_formKey.currentState!.validate()) {
+                        List<dynamic> list = await getEventNameToAddress(ethClient, _controller.text);
+                        String address = list[0].toString();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => ScanQRCodePage(address: address)),
+                        );
+                      }
+                    },
+                    child: const Text('Submit', style: TextStyle(color: Colors.white, fontSize: 24)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class ScanQRCodePage extends StatefulWidget {
+  final String address;
+  ScanQRCodePage({Key? key, required this.address}) : super(key: key);
+
+  @override
+  _ScanQRCodePageState createState() => _ScanQRCodePageState();
+}
+
+class _ScanQRCodePageState extends State<ScanQRCodePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -87,7 +362,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const QRCodePage()),
+                        MaterialPageRoute(builder: (context) => QRCodePage(address: widget.address)),
                       );
                     },
                     child: const Text('Scan QR Code', style: TextStyle(color: Colors.white, fontSize: 24)),
@@ -232,7 +507,8 @@ class GradientText extends StatelessWidget {
 // }
 
 class QRCodePage extends StatefulWidget {
-  const QRCodePage({Key? key}) : super(key: key);
+  final String address;
+  const QRCodePage({Key? key, required this.address}) : super(key: key);
 
   @override
   _QRCodePageState createState() => _QRCodePageState();
@@ -591,7 +867,7 @@ class _QRCodePageState extends State<QRCodePage> {
     );
     Digest digest = sha256.convert(response.bodyBytes);
     print(digest.toString());
-    final contract = DeployedContract(ContractAbi.fromJson(abiJson, "Event"), EthereumAddress.fromHex("0x1921a0CA21FC78FD988c767FCF93D7C54Acc6910"));
+    final contract = DeployedContract(ContractAbi.fromJson(abiJson, "Event"), EthereumAddress.fromHex(widget.address));
     final ethFunction = contract.function("hashes");
     final result = await ethClient.call(contract: contract, function: ethFunction, params: ["0x" + digest.toString()]);
     print(result);
