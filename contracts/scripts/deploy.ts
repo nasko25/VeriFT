@@ -13,6 +13,8 @@ async function main() {
 
   await exampleNFT.deployed();
 
+  console.log("NFTs deployed to:", exampleNFT.address);
+
   const Event = await ethers.getContractFactory("Event");
   const event = await Event.deploy(exampleNFT.address, 2, 0, "Cool Event", "CENT", "ASD");
 

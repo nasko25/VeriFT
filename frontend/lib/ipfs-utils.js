@@ -5,3 +5,8 @@ export const upload = async (file) => {
   const added = await client.add(file);
   return added.path;
 };
+
+export const encryptImage = (image) => {
+  const array = new Uint8Array(image);
+  var encrypted = CryptoJS.AES.encrypt(String.fromCharCode.apply(null, uInt8Array), "test");
+}
