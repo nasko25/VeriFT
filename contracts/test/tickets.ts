@@ -67,4 +67,50 @@ describe("Tickets", function () {
             event.mintTicket(0, 'abd')
         ).to.be.revertedWith("All possible tickets have been minted from this NFT");
     });
+
+    it("Hash of picture is stored after minting first ticket", async function () {
+        const [owner] = await ethers.getSigners();  //get signer
+
+        //deploy the required NFT
+        const ExampleNFT = await ethers.getContractFactory("ExampleNFT");
+        const exampleNFT = await ExampleNFT.deploy("example", "EXM");
+
+        await exampleNFT.deployed();
+
+        //deploy the event contract
+        const Event = await ethers.getContractFactory("Event");
+        const event = await Event.deploy(exampleNFT.address, 2, 0, "Cool Event", "CENT", "ASD");
+
+        await event.deployed();
+
+        await exampleNFT.mint("ABC");
+        event.mintTicket(0, 'abd');
+        await expect(
+            await event.hashes(0)
+        ).to.equal("abd");
+    });
+
+    it("Hash of picture is stored after minting second ticket", async function () {
+        const [owner] = await ethers.getSigners();  //get signer
+
+        //deploy the required NFT
+        const ExampleNFT = await ethers.getContractFactory("ExampleNFT");
+        const exampleNFT = await ExampleNFT.deploy("example", "EXM");
+
+        await exampleNFT.deployed();
+
+        //deploy the event contract
+        const Event = await ethers.getContractFactory("Event");
+        const event = await Event.deploy(exampleNFT.address, 2, 0, "Cool Event", "CENT", "ASD");
+
+        await event.deployed();
+
+        await exampleNFT.mint("ABC");
+        event.mintTicket(0, 'abd');
+        event.mintTicket(0, 'abd1');
+
+        await expect(
+            await event.hashes(1)
+        ).to.equal("abd1");
+    });
 });
