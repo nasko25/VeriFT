@@ -23,11 +23,10 @@ async function main() {
 
   await event.mintTicket(0, 'abd');
   await event.mintTicket(0, 'abc');
-  await event.mintTicket(0, 'abc');
-
 
   const ticketAddress = await event.ticketNFTContract();
   const ticketNFTContract = await ethers.getContractAt("TicketNFT", ticketAddress);
+  console.log("Tickets deployed to:", ticketAddress);
   const ticketsHeld = await ticketNFTContract.balanceOf(owner.address);
   console.log("Tickets held:", ticketsHeld);
 }
