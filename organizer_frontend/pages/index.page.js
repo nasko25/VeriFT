@@ -8,44 +8,9 @@ import { ethers, ContractFactory } from 'ethers';
 import { useSigner } from './contexts/SignerContext';
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
+import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json";
 
-const addressTest = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
-const abi = [
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'approvals',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '_proposalId',
-        type: 'uint256',
-      },
-    ],
-    name: 'handleProposalApproved',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-];
-
-const chain = "ropsten";
+const chain = "rinkeby";
 
 export default function Home() {
   // const signer = useSigner();
@@ -74,7 +39,7 @@ export default function Home() {
     }
   };
 
-  let signer;
+  const [signer, setSigner] = useState(null);
   useEffect(() => {
     // async function getToken() {
     //     const token = await fetchKey(props.auth);
@@ -89,7 +54,7 @@ export default function Home() {
       });
       const instance = await web3Modal.connect();
       const provider = new ethers.providers.Web3Provider(instance);
-      signer = provider.getSigner();
+      setSigner(provider.getSigner());
       // alert(await signer.getBalance());
     }
     runWeb3Modal()
@@ -102,25 +67,31 @@ export default function Home() {
   const [ticketPrice, setTicketPrice] = useState('');
   const [ticketImage, setTicketImage] = useState('');
   const [displayAddress, setDisplayAddress] = useState(false);
+  const [btnDisabled, setBtnDisabled] = useState(false);
 
-  // TODO set to ""
-  let contract = { address: addressTest };
-  // TODO some input verification would be nice
+  const [contract, setContract] = useState({ address: "" });
   const deployContract = async () => {
     if (isNaN(maxTickets))
       alert("Number of nfts to mint is not an integer. Try again.");
     else {
-      // const factory = new ContractFactory(abi, contractByteCode, signer);
-      // const contract = await factory.deploy({_NFTToHold: address,
-      //                                        _maxTicketNumber: maxTickets,
-      //                                        _price: ticketPrice,
-      //                                        _eventName: collecionName,
-      //                                        _eventSymbol: "eth",
-      //                                        imageURI: ticketImage});
+        // Uint8Array.from(Buffer.from(hexString, 'hex'))
+      const factory = new ContractFactory(eventJson.abi, Buffer.from(eventJson.deployedBytecode, 'hex'), signer);
+      const contractConstructor = { _NFTToHold: address,
+                                    _maxTicketNumber: maxTickets,
+                                    _price: ticketPrice,
+                                    _eventName: collecionName,
+                                    _eventSymbol: "eth",
+                                    _tokenURI: ticketImage
+                                  };
+      setContract(await factory.deploy(contractConstructor._NFTToHold,
+                                            contractConstructor._maxTicketNumber,
+                                            ethers.utils.parseEther(contractConstructor._price),
+                                            contractConstructor._eventName,
+                                            contractConstructor._eventSymbol,
+                                            contractConstructor._tokenURI
+                                           )
+      );
 
-      setDisplayAddress(true);
-      console.log("Contract deployed at: ", contract.address);
-      // console.log(contract.deployTransaction);
     }
   }
   // TODO contract addr or choose from list
@@ -147,7 +118,18 @@ export default function Home() {
       <Input className="num-to-mint" value={maxTickets} onInput={e => setMaxTickets(e.target.value)}> Max # of tickets: </Input>
       <Input value={ticketPrice} onInput={e => setTicketPrice(e.target.value)}> Ticket price: </Input>
       <Input value={ticketImage} onInput={e => setTicketImage(e.target.value)}> Ticket image URL: </Input>
-      <Button className="m-3" onClick={deployContract}>
+      <Button className="m-3" disabled={btnDisabled} onClick={(e) => {
+            setBtnDisabled(true);
+            deployContract().then(() => {
+                setDisplayAddress(true);
+                console.log("Contract deployed at: ", contract.address);
+                setBtnDisabled(false);
+            }).catch(e => {
+                setContract({ address: "" });
+                setDisplayAddress(true);
+                setBtnDisabled(false);
+            });
+      }}>
         Generate
       </Button>
       <Dialog open={displayAddress} onClose={() => setDisplayAddress(false)}>
