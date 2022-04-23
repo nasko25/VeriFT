@@ -6,24 +6,31 @@
 import { ethers } from "hardhat";
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Greeter = await ethers.getContractFactory("Greeter");
-  const greeter = await Greeter.deploy("Hello, Hardhat!");
+  const [owner] = await ethers.getSigners();
+  const ExampleNFT = await ethers.getContractFactory("ExampleNFT");
+  const exampleNFT = await ExampleNFT.deploy("example", "EXM");
 
-  await greeter.deployed();
+  await exampleNFT.deployed();
 
-  console.log("Greeter deployed to:", greeter.address);
+  const Event = await ethers.getContractFactory("Event");
+  const event = await Event.deploy(exampleNFT.address, 2, 0, "Cool Event", "CENT", "ASD");
+
+  await event.deployed();
+
+  await exampleNFT.mint("ABC");
+  console.log("Event deployed to:", event.address);
+
+  await event.mintTicket(0, 'abd');
+  await event.mintTicket(0, 'abc');
+
+  const ticketAddress = await event.ticketNFTContract();
+  const ticketNFTContract = await ethers.getContractAt("TicketNFT", ticketAddress);
+  console.log("Tickets deployed to:", ticketAddress);
+  const ticketsHeld = await ticketNFTContract.balanceOf(owner.address);
+  console.log("Tickets held:", ticketsHeld);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;

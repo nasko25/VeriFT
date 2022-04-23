@@ -37,9 +37,7 @@ export default function AddressSelect({ onSignerObtained }) {
         <>
           {shortenAddress(address)}
           <br />
-          {window.ethereum.networkVersion === '80001'
-            ? 'Mumbai'
-            : 'Please change to Mumbai'}
+          {window.ethereum.networkVersion}
         </>
       )}
     </button>
