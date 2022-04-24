@@ -11,7 +11,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json";
 import eventToAddressStoreJson from "../../contracts/artifacts/contracts/EventToAddressStore.sol/EventToAddressStore.json";
 
-const chain = "rinkeby";
+const chain = "ropsten";
 const eventToAddressStoreContractAddress = "0xd43aB058d44ae56BEffA005991FFA3E9a6C41B8A";
 
 export default function Home() {
@@ -33,9 +33,8 @@ export default function Home() {
       options: {
         // infuraId: `9aa3d95b3bc440fa88ea12eaa4456161`,
         // rpc: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}`
-
-        // web3modal needs better documentation  -.-
-        rpc: { 1: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }  // no clue why chain id needs to be 1...
+        rpc: { 3: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }
+        // rpc: { 4: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }
         // rpc: { 1: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"}
       }
     }
