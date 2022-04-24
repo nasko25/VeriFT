@@ -103,25 +103,10 @@ export default function Home() {
   }
   // TODO contract addr or choose from list
 
-  const balance = await lensHub.balanceOf(user.address);
-  let profiles = [];
-  for (var i = 0; i < balance.toNumber(); ++i) {
-    let profile = await lensHub.tokenOfOwnerByIndex(user.address, i);
-    profiles.push(profile);
-  }
-
-  const [value, setValue] = React.useState('fruit');
-
   return (
     <div>
       <Input value={eventName} onInput={e => setEventName(e.target.value)}> Name of the event: </Input>
       <Input className="address" value={address} onInput={e => setAddress(e.target.value)}> Contract address: </Input>
-      or
-      <select value={0} onChange={onChange}>
-        {options.map((option) => (
-          <option value={option.value}>{option.label}</option>
-        ))}
-      </select>
       <Input className="name-of-collection" value={collecionName} onInput={e => setCollecionName(e.target.value)}> Collection Name: </Input>
       <Input className="num-to-mint" value={maxTickets} onInput={e => setMaxTickets(e.target.value)}> Max # of tickets: </Input>
       <Input value={ticketPrice} onInput={e => setTicketPrice(e.target.value)}> Ticket price: </Input>
