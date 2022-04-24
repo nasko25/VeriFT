@@ -22,7 +22,7 @@ export default function UserFrontend() {
   return (
     <div>
       <h1 className="text-2xl text-center">Find Your Event</h1>
-      <p className="text-gray-600 text-center">Hint: try Cool Event</p>
+      <p className="text-gray-600 text-center">Hint: try expensive event</p>
       <div className="flex justify-center">
         <input
           className="border-2 border-gray-500 p-2 rounded-lg"
