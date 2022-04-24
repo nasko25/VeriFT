@@ -1,4 +1,4 @@
-import {React, useState, useEffect} from 'react';
+import { React, useState, useEffect } from 'react';
 import Button from './components/Button';
 import Input from './components/Input';
 import { Dialog } from './components/Dialog';
@@ -11,7 +11,7 @@ import WalletConnectProvider from "@walletconnect/web3-provider";
 import eventJson from "../../contracts/artifacts/contracts/Event.sol/Event.json";
 import eventToAddressStoreJson from "../../contracts/artifacts/contracts/EventToAddressStore.sol/EventToAddressStore.json";
 
-const chain = "rinkeby";
+const chain = "ropsten";
 const eventToAddressStoreContractAddress = "0xd43aB058d44ae56BEffA005991FFA3E9a6C41B8A";
 
 export default function Home() {
@@ -33,9 +33,8 @@ export default function Home() {
       options: {
         // infuraId: `9aa3d95b3bc440fa88ea12eaa4456161`,
         // rpc: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}`
-
-        // web3modal needs better documentation  -.-
-        rpc: { 1: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }  // no clue why chain id needs to be 1...
+        rpc: { 3: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }
+        // rpc: { 4: `https://api-eu1.tatum.io/v3/blockchain/node/ETH/${process.env.TATUM_API_KEY}` }
         // rpc: { 1: "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161"}
       }
     }
@@ -60,7 +59,7 @@ export default function Home() {
       // alert(await signer.getBalance());
     }
     runWeb3Modal()
- }, [])
+  }, [])
 
 
   const [eventName, setEventName] = useState('');
@@ -103,10 +102,26 @@ export default function Home() {
     }
   }
   // TODO contract addr or choose from list
+
+  const balance = await lensHub.balanceOf(user.address);
+  let profiles = [];
+  for (var i = 0; i < balance.toNumber(); ++i) {
+    let profile = await lensHub.tokenOfOwnerByIndex(user.address, i);
+    profiles.push(profile);
+  }
+
+  const [value, setValue] = React.useState('fruit');
+
   return (
     <div>
       <Input value={eventName} onInput={e => setEventName(e.target.value)}> Name of the event: </Input>
       <Input className="address" value={address} onInput={e => setAddress(e.target.value)}> Contract address: </Input>
+      or
+      <select value={0} onChange={onChange}>
+        {options.map((option) => (
+          <option value={option.value}>{option.label}</option>
+        ))}
+      </select>
       <Input className="name-of-collection" value={collecionName} onInput={e => setCollecionName(e.target.value)}> Collection Name: </Input>
       <Input className="num-to-mint" value={maxTickets} onInput={e => setMaxTickets(e.target.value)}> Max # of tickets: </Input>
       <Input value={ticketPrice} onInput={e => setTicketPrice(e.target.value)}> Ticket price: </Input>
@@ -126,8 +141,8 @@ export default function Home() {
       }}>
         Generate
       </Button>
-      <Dialog open={displayAddress} onClose={ () => setDisplayAddress(false) }>
-      { contract.address != "" ? <DeployedAddressBox> {contract.address} </DeployedAddressBox> : <ErrorDeployingBox onClick={() => setDisplayAddress(false)}/> }
+      <Dialog open={displayAddress} onClose={() => setDisplayAddress(false)}>
+        {contract.address != "" ? <DeployedAddressBox> {contract.address} </DeployedAddressBox> : <ErrorDeployingBox onClick={() => setDisplayAddress(false)} />}
       </Dialog>
     </div>
   );
